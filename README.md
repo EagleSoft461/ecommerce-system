@@ -75,6 +75,16 @@ docker-compose up -d
 
 Once running, visit: `http://localhost:8082/swagger-ui/index.html`
 
+### Orders
+| Method | Endpoint | Access |
+|--------|----------|--------|
+| POST | `/api/v1/orders` | Authenticated |
+| GET | `/api/v1/orders/my-orders` | Authenticated |
+| GET | `/api/v1/orders/{id}` | Authenticated |
+| GET | `/api/v1/orders` | ADMIN |
+| PATCH | `/api/v1/orders/{id}/status` | ADMIN |
+| PATCH | `/api/v1/orders/{id}/cancel` | Authenticated |
+
 ## 📡 API Endpoints
 
 ### Authentication
@@ -105,7 +115,8 @@ Once running, visit: `http://localhost:8082/swagger-ui/index.html`
 
 - [x] Auth module (JWT, BCrypt, RBAC)
 - [x] Product module (CRUD, pagination, search)
-- [ ] Order module
+- [x] Order module (stock control, status tracking, price snapshot)
+- [ ] Inventory management
 - [ ] Inventory management
 - [ ] Payment integration
 - [ ] Apache Kafka (event-driven architecture)
