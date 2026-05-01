@@ -119,10 +119,7 @@ Once running, visit: `http://localhost:8082/swagger-ui/index.html`
 - [x] Order module (stock control, status tracking, price snapshot)
 - [x] Event-driven architecture (Apache Kafka)
 - [ ] Redis caching
-- [ ] Inventory management
 - [ ] Payment integration
-- [ ] Apache Kafka (event-driven architecture)
-- [ ] Redis caching
 - [ ] Microservice migration
 
 ## 📄 License
