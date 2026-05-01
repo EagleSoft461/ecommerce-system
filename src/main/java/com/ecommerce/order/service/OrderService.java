@@ -3,6 +3,9 @@ package com.ecommerce.order.service;
 import com.ecommerce.auth.model.User;
 import com.ecommerce.common.exception.BadRequestException;
 import com.ecommerce.common.exception.NotFoundException;
+import com.ecommerce.event.model.OrderCancelledEvent;
+import com.ecommerce.event.model.OrderCreatedEvent;
+import com.ecommerce.event.publisher.OrderEventPublisher;
 import com.ecommerce.order.dto.CreateOrderRequest;
 import com.ecommerce.order.dto.OrderItemResponse;
 import com.ecommerce.order.dto.OrderResponse;
@@ -30,6 +33,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final OrderEventPublisher orderEventPublisher;
 
     @Transactional
     public OrderResponse createOrder(CreateOrderRequest request) {
@@ -81,6 +85,16 @@ public class OrderService {
 
         order.setTotalAmount(totalAmount);
         Order savedOrder = orderRepository.save(order);
+
+        // Kafka'ya ORDER_CREATED eventi yayınla
+        orderEventPublisher.publishOrderCreated(OrderCreatedEvent.builder()
+                .orderId(savedOrder.getId())
+                .userId(currentUser.getId())
+                .userEmail(currentUser.getEmail())
+                .totalAmount(savedOrder.getTotalAmount())
+                .shippingAddress(savedOrder.getShippingAddress())
+                .createdAt(savedOrder.getCreatedAt())
+                .build());
 
         log.info("Order created: {} for user: {}", savedOrder.getId(), currentUser.getEmail());
         return toResponse(savedOrder);
@@ -150,6 +164,15 @@ public class OrderService {
         }
 
         order.setStatus(Order.OrderStatus.CANCELLED);
+
+        // Kafka'ya ORDER_CANCELLED eventi yayınla
+        orderEventPublisher.publishOrderCancelled(OrderCancelledEvent.builder()
+                .orderId(order.getId())
+                .userId(order.getUser().getId())
+                .userEmail(order.getUser().getEmail())
+                .cancelledAt(java.time.LocalDateTime.now())
+                .build());
+
         log.info("Order {} cancelled", id);
         return toResponse(orderRepository.save(order));
     }
