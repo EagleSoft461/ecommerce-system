@@ -31,6 +31,7 @@ A production-level e-commerce backend built with Spring Boot, designed with clea
 | Build | Maven |
 | Containerization | Docker Compose |
 | Documentation | Swagger / OpenAPI 3.0 |
+| Message Broker | Apache Kafka |
 
 ## 📁 Architecture
 
@@ -116,7 +117,8 @@ Once running, visit: `http://localhost:8082/swagger-ui/index.html`
 - [x] Auth module (JWT, BCrypt, RBAC)
 - [x] Product module (CRUD, pagination, search)
 - [x] Order module (stock control, status tracking, price snapshot)
-- [ ] Inventory management
+- [x] Event-driven architecture (Apache Kafka)
+- [ ] Redis caching
 - [ ] Inventory management
 - [ ] Payment integration
 - [ ] Apache Kafka (event-driven architecture)
