@@ -32,6 +32,7 @@ A production-level e-commerce backend built with Spring Boot, designed with clea
 | Containerization | Docker Compose |
 | Documentation | Swagger / OpenAPI 3.0 |
 | Message Broker | Apache Kafka |
+| Caching | Redis 7 |
 
 ## 📁 Architecture
 
@@ -118,7 +119,7 @@ Once running, visit: `http://localhost:8082/swagger-ui/index.html`
 - [x] Product module (CRUD, pagination, search)
 - [x] Order module (stock control, status tracking, price snapshot)
 - [x] Event-driven architecture (Apache Kafka)
-- [ ] Redis caching
+- [x] Redis caching
 - [ ] Payment integration
 - [ ] Microservice migration
 
