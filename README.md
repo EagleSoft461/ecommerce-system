@@ -3,21 +3,50 @@
 ![Java](https://img.shields.io/badge/Java-17-orange?style=flat-square&logo=java)
 ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.4-brightgreen?style=flat-square&logo=springboot)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue?style=flat-square&logo=postgresql)
-![JWT](https://img.shields.io/badge/JWT-Auth-black?style=flat-square&logo=jsonwebtokens)
+![Kafka](https://img.shields.io/badge/Apache%20Kafka-3.6-black?style=flat-square&logo=apachekafka)
+![Redis](https://img.shields.io/badge/Redis-7-red?style=flat-square&logo=redis)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker)
 ![Swagger](https://img.shields.io/badge/Swagger-OpenAPI%203.0-85EA2D?style=flat-square&logo=swagger)
 
-A production-level e-commerce backend built with Spring Boot, designed with clean layered architecture and ready for microservice migration.
+A production-level e-commerce backend built with Spring Boot, featuring microservice architecture, event-driven design, and distributed caching.
+
+---
+
+## 🏗 Architecture
+
+```
+Client
+  ↓
+API Gateway (8090)          ← Single entry point, JWT validation
+  ├── /api/v1/auth/**    → auth-service    (8081)
+  ├── /api/v1/products/** → product-service (8082)
+  └── /api/v1/orders/**  → order-service   (8083)
+
+Each service has its own database:
+  auth-service    → auth_db    (PostgreSQL)
+  product-service → product_db (PostgreSQL + Redis)
+  order-service   → order_db   (PostgreSQL)
+
+Async communication:
+  order-service → Kafka → notification-service
+```
+
+---
 
 ## ✨ Features
 
 - **JWT Authentication** — Stateless auth with access & refresh tokens
 - **Role-Based Access Control** — USER / ADMIN roles via Spring Security
 - **Product Management** — CRUD, pagination, sorting, keyword search
-- **Category Management** — Hierarchical product categorization
-- **Soft Delete** — Data integrity preserved, no hard deletes
+- **Order Management** — Stock validation, status tracking, price snapshot
+- **Event-Driven Architecture** — Apache Kafka for async notifications
+- **Redis Caching** — Product caching with automatic invalidation
+- **API Gateway** — Single entry point with JWT validation and routing
+- **Microservice Architecture** — Each service independently deployable
 - **Global Exception Handling** — Consistent error responses
 - **API Documentation** — Swagger / OpenAPI 3.0
+
+---
 
 ## 🛠 Tech Stack
 
@@ -28,34 +57,36 @@ A production-level e-commerce backend built with Spring Boot, designed with clea
 | Security | Spring Security + JWT |
 | Database | PostgreSQL 15 |
 | ORM | Spring Data JPA / Hibernate |
+| Caching | Redis 7 |
+| Message Broker | Apache Kafka |
+| API Gateway | Spring Cloud Gateway |
 | Build | Maven |
 | Containerization | Docker Compose |
 | Documentation | Swagger / OpenAPI 3.0 |
-| Message Broker | Apache Kafka |
-| Caching | Redis 7 |
 
-## 📁 Architecture
+---
+
+## 📁 Project Structure
 
 ```
-src/main/java/com/ecommerce/
-├── auth/               # Authentication & authorization
-│   ├── controller/
-│   ├── service/
-│   ├── repository/
-│   ├── model/
-│   └── dto/
-├── product/            # Product & category management
-│   ├── controller/
-│   ├── service/
-│   ├── repository/
-│   ├── model/
-│   └── dto/
-├── common/             # Shared utilities
-│   ├── exception/
-│   ├── response/
-│   └── util/
-└── config/             # Security & Swagger config
+ecommerce-system/
+├── src/                          # Monolith (reference implementation)
+│   └── main/java/com/ecommerce/
+│       ├── auth/
+│       ├── product/
+│       ├── order/
+│       ├── event/
+│       └── config/
+│
+└── microservices/                # Microservice architecture
+    ├── api-gateway/              # Port 8090
+    ├── auth-service/             # Port 8081
+    ├── product-service/          # Port 8082
+    ├── order-service/            # Port 8083
+    └── docker-compose.yml
 ```
+
+---
 
 ## 🚀 Getting Started
 
@@ -63,31 +94,31 @@ src/main/java/com/ecommerce/
 - Java 17+
 - Docker & Docker Compose
 
-### Run with Docker
+### Run Microservices
 
 ```bash
-# Start PostgreSQL
-docker-compose up -d
+# Start infrastructure (PostgreSQL x3, Redis, Kafka, Zookeeper)
+docker-compose -f microservices/docker-compose.yml up -d
 
-# Run the application
-./mvnw spring-boot:run
+# Start each service in separate terminals
+mvn spring-boot:run -f microservices/auth-service/pom.xml
+mvn spring-boot:run -f microservices/product-service/pom.xml
+mvn spring-boot:run -f microservices/order-service/pom.xml
+mvn spring-boot:run -f microservices/api-gateway/pom.xml
 ```
 
-### API Documentation
+### Run Monolith (reference)
 
-Once running, visit: `http://localhost:8082/swagger-ui/index.html`
+```bash
+docker-compose up -d
+mvn spring-boot:run
+```
 
-### Orders
-| Method | Endpoint | Access |
-|--------|----------|--------|
-| POST | `/api/v1/orders` | Authenticated |
-| GET | `/api/v1/orders/my-orders` | Authenticated |
-| GET | `/api/v1/orders/{id}` | Authenticated |
-| GET | `/api/v1/orders` | ADMIN |
-| PATCH | `/api/v1/orders/{id}/status` | ADMIN |
-| PATCH | `/api/v1/orders/{id}/cancel` | Authenticated |
+---
 
 ## 📡 API Endpoints
+
+All requests go through the API Gateway at `http://localhost:8090`
 
 ### Authentication
 | Method | Endpoint | Access |
@@ -113,6 +144,18 @@ Once running, visit: `http://localhost:8082/swagger-ui/index.html`
 | PUT | `/api/v1/categories/{id}` | ADMIN |
 | DELETE | `/api/v1/categories/{id}` | ADMIN |
 
+### Orders
+| Method | Endpoint | Access |
+|--------|----------|--------|
+| POST | `/api/v1/orders` | Authenticated |
+| GET | `/api/v1/orders/my-orders` | Authenticated |
+| GET | `/api/v1/orders/{id}` | Authenticated |
+| GET | `/api/v1/orders` | ADMIN |
+| PATCH | `/api/v1/orders/{id}/status` | ADMIN |
+| PATCH | `/api/v1/orders/{id}/cancel` | Authenticated |
+
+---
+
 ## 🗺 Roadmap
 
 - [x] Auth module (JWT, BCrypt, RBAC)
@@ -120,8 +163,12 @@ Once running, visit: `http://localhost:8082/swagger-ui/index.html`
 - [x] Order module (stock control, status tracking, price snapshot)
 - [x] Event-driven architecture (Apache Kafka)
 - [x] Redis caching
+- [x] Microservice migration (API Gateway + 3 services)
 - [ ] Payment integration
-- [ ] Microservice migration
+- [ ] Kubernetes deployment
+- [ ] CI/CD pipeline
+
+---
 
 ## 📄 License
 
