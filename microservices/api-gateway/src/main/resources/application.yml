@@ -1,0 +1,47 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        # Auth Service - token gerektirmez
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/v1/auth/**
+
+        # Product Service - GET istekleri herkese açık
+        - id: product-service-public
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/v1/products/**, /api/v1/categories/**
+            - Method=GET
+
+        # Product Service - POST/PUT/DELETE ADMIN gerektirir
+        - id: product-service-protected
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/v1/products/**, /api/v1/categories/**
+            - Method=POST,PUT,DELETE
+          filters:
+            - JwtAuthenticationFilter
+
+        # Order Service - authentication gerektirir
+        - id: order-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/v1/orders/**
+          filters:
+            - JwtAuthenticationFilter
+
+app:
+  jwt:
+    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.ecommerce.gateway: DEBUG
