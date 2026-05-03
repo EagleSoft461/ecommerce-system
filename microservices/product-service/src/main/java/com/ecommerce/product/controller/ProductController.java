@@ -1,6 +1,6 @@
 package com.ecommerce.product.controller;
 
-import com.ecommerce.common.response.ApiResponse;
+import com.ecommerce.product.common.response.ApiResponse;
 import com.ecommerce.product.dto.ProductRequest;
 import com.ecommerce.product.dto.ProductResponse;
 import com.ecommerce.product.service.ProductService;

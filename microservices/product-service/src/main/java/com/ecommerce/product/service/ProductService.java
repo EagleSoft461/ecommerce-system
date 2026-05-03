@@ -1,6 +1,6 @@
 package com.ecommerce.product.service;
 
-import com.ecommerce.common.exception.NotFoundException;
+import com.ecommerce.product.common.exception.NotFoundException;
 import com.ecommerce.product.dto.ProductRequest;
 import com.ecommerce.product.dto.ProductResponse;
 import com.ecommerce.product.model.Category;

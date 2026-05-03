@@ -9,9 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    // Kullanıcının kendi siparişleri
-    Page<Order> findByUserId(Long userId, Pageable pageable);
+    Page<Order> findByUserEmail(String userEmail, Pageable pageable);
 
-    // Belirli durumdaki siparişler (ADMIN için)
     Page<Order> findByStatus(Order.OrderStatus status, Pageable pageable);
 }

@@ -1,6 +1,5 @@
 package com.ecommerce.order.model;
 
-import com.ecommerce.auth.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,9 +23,12 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    // Microservice: User entity yok, sadece ID ve email saklıyoruz
+    @Column(nullable = false)
+    private Long userId;
+
+    @Column(nullable = false)
+    private String userEmail;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
@@ -60,10 +62,6 @@ public class Order {
     }
 
     public enum OrderStatus {
-        PENDING,
-        CONFIRMED,
-        SHIPPED,
-        DELIVERED,
-        CANCELLED
+        PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
     }
 }

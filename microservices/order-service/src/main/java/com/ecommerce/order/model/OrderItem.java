@@ -1,6 +1,5 @@
 package com.ecommerce.order.model;
 
-import com.ecommerce.product.model.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,15 +24,16 @@ public class OrderItem {
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    // Microservice: Product entity yok, sadece ID ve name saklıyoruz
+    @Column(nullable = false)
+    private Long productId;
+
+    @Column(nullable = false)
+    private String productName;
 
     @Column(nullable = false)
     private Integer quantity;
 
-    // Sipariş anındaki fiyatı saklıyoruz
-    // Ürün fiyatı sonradan değişse bile sipariş fiyatı korunur
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal unitPrice;
 
