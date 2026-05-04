@@ -7,6 +7,7 @@
 ![Redis](https://img.shields.io/badge/Redis-7-red?style=flat-square&logo=redis)
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker)
 ![Swagger](https://img.shields.io/badge/Swagger-OpenAPI%203.0-85EA2D?style=flat-square&logo=swagger)
+![CI](https://github.com/EagleSoft461/ecommerce-system/actions/workflows/ci.yml/badge.svg)
 
 A production-level e-commerce backend built with Spring Boot, featuring microservice architecture, event-driven design, and distributed caching.
 
@@ -164,6 +165,8 @@ All requests go through the API Gateway at `http://localhost:8090`
 - [x] Event-driven architecture (Apache Kafka)
 - [x] Redis caching
 - [x] Microservice migration (API Gateway + 3 services)
+- [x] Docker containerization
+- [x] CI/CD pipeline (GitHub Actions)
 - [ ] Payment integration
 - [ ] Kubernetes deployment
 - [ ] CI/CD pipeline
