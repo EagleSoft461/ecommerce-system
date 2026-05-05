@@ -9,20 +9,20 @@ spring:
       routes:
         # Auth Service - token gerektirmez
         - id: auth-service
-          uri: http://localhost:8081
+          uri: ${AUTH_SERVICE_URI:http://localhost:8081}
           predicates:
             - Path=/api/v1/auth/**
 
         # Product Service - GET istekleri herkese açık
         - id: product-service-public
-          uri: http://localhost:8082
+          uri: ${PRODUCT_SERVICE_URI:http://localhost:8082}
           predicates:
             - Path=/api/v1/products/**, /api/v1/categories/**
             - Method=GET
 
         # Product Service - POST/PUT/DELETE ADMIN gerektirir
         - id: product-service-protected
-          uri: http://localhost:8082
+          uri: ${PRODUCT_SERVICE_URI:http://localhost:8082}
           predicates:
             - Path=/api/v1/products/**, /api/v1/categories/**
             - Method=POST,PUT,DELETE
@@ -31,7 +31,7 @@ spring:
 
         # Order Service - authentication gerektirir
         - id: order-service
-          uri: http://localhost:8083
+          uri: ${ORDER_SERVICE_URI:http://localhost:8083}
           predicates:
             - Path=/api/v1/orders/**
           filters:
@@ -39,7 +39,16 @@ spring:
 
 app:
   jwt:
-    secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    secret: ${APP_JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
 
 logging:
   level:
