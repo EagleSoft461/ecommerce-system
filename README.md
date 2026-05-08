@@ -84,6 +84,7 @@ Async communication:
 | Orchestration | Kubernetes (Minikube) |
 | Package Manager | Helm 4.x |
 | Monitoring | Prometheus + Grafana (kube-prometheus-stack) |
+| Tracing | Zipkin + Micrometer Tracing |
 | Documentation | Swagger / OpenAPI 3.0 |
 | CI/CD | GitHub Actions |
 
@@ -249,7 +250,7 @@ Grafana dashboards available after deploying the monitoring stack:
 - [x] CI/CD pipeline (GitHub Actions)
 - [x] Kubernetes deployment (Minikube)
 - [x] Monitoring (Prometheus + Grafana via Helm)
-- [ ] Distributed Tracing (Zipkin)
+- [x] Distributed Tracing (Zipkin + Micrometer)
 - [ ] Helm Charts for application
 - [ ] Payment integration
 
