@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.authService.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ecommerce.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.authService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.authService.name }}
+    spec:
+      containers:
+        - name: {{ .Values.authService.name }}
+          image: "{{ .Values.authService.image }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.authService.port }}
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://auth-db-service:5432/{{ .Values.authService.dbName }}"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: DB_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: DB_PASSWORD
+            - name: APP_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: JWT_SECRET
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.authService.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: {{ .Values.authService.name }}
+  ports:
+    - port: {{ .Values.authService.port }}
+      targetPort: {{ .Values.authService.port }}
+  type: ClusterIP

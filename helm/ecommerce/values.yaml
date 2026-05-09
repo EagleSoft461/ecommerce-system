@@ -1,0 +1,65 @@
+# ============================================================
+# E-Commerce Microservices - Helm Values
+# Override: helm install ecommerce . --set image.tag=v2.0
+# ============================================================
+
+namespace: ecommerce
+
+# Image settings
+image:
+  pullPolicy: Never  # minikube local images
+  tag: latest
+
+# JWT Secret (base64 encoded)
+jwt:
+  secret: NDA0RTYzNTI2NjU1NkE1ODZFMzI3MjM1NzUzODc4MkY0MTNGNDQyODQ3MkI0QjYyNTA2NDUzNjc1NkI1OTcw
+
+# Database credentials (base64 encoded)
+db:
+  username: cG9zdGdyZXM=
+  password: cG9zdGdyZXM=
+
+# Services
+authService:
+  name: auth-service
+  port: 8081
+  image: auth-service
+  dbName: auth_db
+
+productService:
+  name: product-service
+  port: 8082
+  image: product-service
+  dbName: product_db
+
+orderService:
+  name: order-service
+  port: 8083
+  image: order-service
+  dbName: order_db
+
+apiGateway:
+  name: api-gateway
+  port: 8090
+  image: api-gateway
+  nodePort: 30090
+
+# Infrastructure
+redis:
+  port: 6379
+
+kafka:
+  port: 9092
+
+zipkin:
+  port: 9411
+  nodePort: 30411
+
+# Resources
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "1000m"

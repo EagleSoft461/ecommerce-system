@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.productService.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ecommerce.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.productService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.productService.name }}
+    spec:
+      containers:
+        - name: {{ .Values.productService.name }}
+          image: "{{ .Values.productService.image }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.productService.port }}
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://product-db-service:5432/{{ .Values.productService.dbName }}"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: DB_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: DB_PASSWORD
+            - name: SPRING_DATA_REDIS_HOST
+              value: "redis-service"
+            - name: SPRING_DATA_REDIS_PORT
+              value: "{{ .Values.redis.port }}"
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka-service:{{ .Values.kafka.port }}"
+            - name: APP_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: JWT_SECRET
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.productService.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: {{ .Values.productService.name }}
+  ports:
+    - port: {{ .Values.productService.port }}
+      targetPort: {{ .Values.productService.port }}
+  type: ClusterIP

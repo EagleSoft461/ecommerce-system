@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.orderService.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ecommerce.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.orderService.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.orderService.name }}
+    spec:
+      containers:
+        - name: {{ .Values.orderService.name }}
+          image: "{{ .Values.orderService.image }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.orderService.port }}
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://order-db-service:5432/{{ .Values.orderService.dbName }}"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: DB_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: DB_PASSWORD
+            - name: SPRING_KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka-service:{{ .Values.kafka.port }}"
+            - name: SERVICES_PRODUCT_SERVICE_URL
+              value: "http://{{ .Values.productService.name }}:{{ .Values.productService.port }}"
+            - name: APP_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: JWT_SECRET
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.orderService.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: {{ .Values.orderService.name }}
+  ports:
+    - port: {{ .Values.orderService.port }}
+      targetPort: {{ .Values.orderService.port }}
+  type: ClusterIP

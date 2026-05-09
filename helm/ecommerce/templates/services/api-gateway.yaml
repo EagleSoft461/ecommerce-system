@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.apiGateway.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "ecommerce.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.apiGateway.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.apiGateway.name }}
+    spec:
+      containers:
+        - name: {{ .Values.apiGateway.name }}
+          image: "{{ .Values.apiGateway.image }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.apiGateway.port }}
+          env:
+            - name: AUTH_SERVICE_URI
+              value: "http://{{ .Values.authService.name }}:{{ .Values.authService.port }}"
+            - name: PRODUCT_SERVICE_URI
+              value: "http://{{ .Values.productService.name }}:{{ .Values.productService.port }}"
+            - name: ORDER_SERVICE_URI
+              value: "http://{{ .Values.orderService.name }}:{{ .Values.orderService.port }}"
+            - name: APP_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: ecommerce-secrets
+                  key: JWT_SECRET
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.apiGateway.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: {{ .Values.apiGateway.name }}
+  ports:
+    - port: {{ .Values.apiGateway.port }}
+      targetPort: {{ .Values.apiGateway.port }}
+      nodePort: {{ .Values.apiGateway.nodePort }}
+  type: NodePort
