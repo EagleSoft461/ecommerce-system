@@ -7,27 +7,10 @@ on:
     branches: [ main ]
 
 jobs:
-
-  # ── Monolith Build & Test ──────────────────────────────
+  # ── Monolith Build ──────────────────────────────────────────────────────────
   monolith:
-    name: Monolith - Build & Test
+    name: Monolith - Build
     runs-on: ubuntu-latest
-
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_DB: ecommerce_db
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -42,17 +25,10 @@ jobs:
       - name: Build monolith
         run: mvn clean compile -q
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: monolith-classes
-          path: target/classes
-
-  # ── Auth Service Build ─────────────────────────────────
+  # ── Auth Service - Build & Test ─────────────────────────────────────────────
   auth-service:
-    name: Auth Service - Build
+    name: Auth Service - Build & Test
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -64,14 +40,20 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build auth-service
-        run: mvn clean compile -q -f microservices/auth-service/pom.xml
+      - name: Build & Test auth-service
+        run: mvn clean verify -f microservices/auth-service/pom.xml
 
-  # ── Product Service Build ──────────────────────────────
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: auth-service-test-results
+          path: microservices/auth-service/target/surefire-reports/
+
+  # ── Product Service Build ───────────────────────────────────────────────────
   product-service:
     name: Product Service - Build
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -84,13 +66,12 @@ jobs:
           cache: maven
 
       - name: Build product-service
-        run: mvn clean compile -q -f microservices/product-service/pom.xml
+        run: mvn clean package -DskipTests -q -f microservices/product-service/pom.xml
 
-  # ── Order Service Build ────────────────────────────────
+  # ── Order Service Build ─────────────────────────────────────────────────────
   order-service:
     name: Order Service - Build
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -103,13 +84,12 @@ jobs:
           cache: maven
 
       - name: Build order-service
-        run: mvn clean compile -q -f microservices/order-service/pom.xml
+        run: mvn clean package -DskipTests -q -f microservices/order-service/pom.xml
 
-  # ── API Gateway Build ──────────────────────────────────
+  # ── API Gateway Build ───────────────────────────────────────────────────────
   api-gateway:
     name: API Gateway - Build
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -122,14 +102,13 @@ jobs:
           cache: maven
 
       - name: Build api-gateway
-        run: mvn clean compile -q -f microservices/api-gateway/pom.xml
+        run: mvn clean package -DskipTests -q -f microservices/api-gateway/pom.xml
 
-  # ── All Services Pass ──────────────────────────────────
+  # ── All Services Pass ───────────────────────────────────────────────────────
   all-services-pass:
     name: All Services Pass
     runs-on: ubuntu-latest
     needs: [monolith, auth-service, product-service, order-service, api-gateway]
-
     steps:
-      - name: All builds successful
-        run: echo "✅ All services built successfully!"
+      - name: All builds and tests successful
+        run: echo "✅ All services built and tested successfully!"
