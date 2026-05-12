@@ -75,9 +75,9 @@ jobs:
           name: product-service-test-results
           path: microservices/product-service/target/surefire-reports/
 
-  # ── Order Service Build ─────────────────────────────────────────────────────
+  # ── Order Service Build & Test ─────────────────────────────────────────────
   order-service:
-    name: Order Service - Build
+    name: Order Service - Build & Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -90,8 +90,15 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build order-service
-        run: mvn clean package -DskipTests -q -f microservices/order-service/pom.xml
+      - name: Build & Test order-service
+        run: mvn clean verify -f microservices/order-service/pom.xml
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: order-service-test-results
+          path: microservices/order-service/target/surefire-reports/
 
   # ── API Gateway Build ───────────────────────────────────────────────────────
   api-gateway:
