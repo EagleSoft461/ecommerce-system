@@ -7,18 +7,28 @@ spring:
   cloud:
     gateway:
       routes:
-        # Auth Service - token gerektirmez
+        # Auth Service - token gerektirmez, rate limit: 5 req/s (brute force koruması)
         - id: auth-service
           uri: ${AUTH_SERVICE_URI:http://localhost:8081}
           predicates:
             - Path=/api/v1/auth/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter: "#{@authRateLimiter}"
+                key-resolver: "#{@ipKeyResolver}"
 
-        # Product Service - GET istekleri herkese açık
+        # Product Service - GET istekleri herkese açık, rate limit: 10 req/s
         - id: product-service-public
           uri: ${PRODUCT_SERVICE_URI:http://localhost:8082}
           predicates:
             - Path=/api/v1/products/**, /api/v1/categories/**
             - Method=GET
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter: "#{@defaultRateLimiter}"
+                key-resolver: "#{@ipKeyResolver}"
 
         # Product Service - POST/PUT/DELETE ADMIN gerektirir
         - id: product-service-protected
@@ -28,6 +38,10 @@ spring:
             - Method=POST,PUT,DELETE
           filters:
             - JwtAuthenticationFilter
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter: "#{@defaultRateLimiter}"
+                key-resolver: "#{@ipKeyResolver}"
 
         # Order Service - authentication gerektirir
         - id: order-service
@@ -36,6 +50,14 @@ spring:
             - Path=/api/v1/orders/**
           filters:
             - JwtAuthenticationFilter
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter: "#{@defaultRateLimiter}"
+                key-resolver: "#{@ipKeyResolver}"
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
 
 app:
   jwt:

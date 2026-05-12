@@ -26,6 +26,10 @@ spec:
               value: "http://product-service:8082"
             - name: ORDER_SERVICE_URI
               value: "http://order-service:8083"
+            - name: REDIS_HOST
+              value: "redis-service"
+            - name: REDIS_PORT
+              value: "6379"
             - name: APP_JWT_SECRET
               valueFrom:
                 secretKeyRef:
