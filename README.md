@@ -85,6 +85,7 @@ Async communication:
 | Package Manager | Helm 4.x |
 | Monitoring | Prometheus + Grafana (kube-prometheus-stack) |
 | Tracing | Zipkin + Micrometer Tracing |
+| Testing | JUnit 5 + Mockito + MockMvc + H2 |
 | Documentation | Swagger / OpenAPI 3.0 |
 | CI/CD | GitHub Actions |
 
@@ -238,6 +239,30 @@ Grafana dashboards available after deploying the monitoring stack:
 
 ---
 
+## 🧪 Testing
+
+**32 tests across 3 microservices — all passing in CI.**
+
+| Service | Tests | Type |
+|---------|-------|------|
+| auth-service | 13 | Unit (Mockito) + Integration (MockMvc + H2) |
+| product-service | 10 | Unit (Mockito) |
+| order-service | 9 | Unit (Mockito) |
+
+**What's tested:**
+- Auth: register/login happy path, duplicate email, validation, JWT generation
+- Product: CRUD operations, pagination, search, cache eviction
+- Order: order creation, stock validation, Kafka event publishing, cancellation rules
+
+Run tests locally:
+```bash
+mvn test -f microservices/auth-service/pom.xml
+mvn test -f microservices/product-service/pom.xml
+mvn test -f microservices/order-service/pom.xml
+```
+
+---
+
 ## 🗺 Roadmap
 
 - [x] Auth module (JWT, BCrypt, RBAC)
@@ -251,7 +276,10 @@ Grafana dashboards available after deploying the monitoring stack:
 - [x] Kubernetes deployment (Minikube)
 - [x] Monitoring (Prometheus + Grafana via Helm)
 - [x] Distributed Tracing (Zipkin + Micrometer)
-- [ ] Helm Charts for application
+- [x] Helm Charts for application
+- [x] Unit & Integration Tests (32 tests across 3 services)
+- [x] CI/CD with automated testing (GitHub Actions)
+- [ ] Rate Limiting (API Gateway)
 - [ ] Payment integration
 
 ---
