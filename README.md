@@ -279,7 +279,7 @@ mvn test -f microservices/order-service/pom.xml
 - [x] Helm Charts for application
 - [x] Unit & Integration Tests (32 tests across 3 services)
 - [x] CI/CD with automated testing (GitHub Actions)
-- [ ] Rate Limiting (API Gateway)
+- [x] Rate Limiting (API Gateway)
 - [ ] Payment integration
 
 ---
